@@ -29,6 +29,9 @@ type DocumentService interface {
 	Update(documentId string, doc *Document) error
 
 	Remove(documentId string) error
+
+	SessionQueries() int
+
 }
 
 type DocumentStorage interface {
@@ -41,4 +44,6 @@ type DocumentStorage interface {
 	Update(documentId string, doc *Document) error
 
 	RemoveOne(documentId string) error
+
+	SessionQueries() int
 }

@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+var queriesCounter int
+
 type documentStorage struct {
 	session        *mgo.Session
 	databaseName   string
@@ -54,6 +56,7 @@ func NewDocumentStorage(mongoURL, databaseName string, debugLog logger) (*docume
 }
 
 func (ds *documentStorage) Insert(document *domain.Document) (string, error) {
+	queriesCounter++
 	ds.debugLog.Printf("storage: insert document [%s] and value [%s]", document.ID, document.Value)
 
 	session := ds.session.Copy()
@@ -74,6 +77,7 @@ func (ds *documentStorage) Insert(document *domain.Document) (string, error) {
 }
 
 func (ds *documentStorage) Update(documentId string, doc *domain.Document) error {
+	queriesCounter++
 	ds.debugLog.Printf("storage: update document for doc ID [%s] and ID [%s]", documentId, doc.Value)
 
 	session := ds.session.Copy()
@@ -94,6 +98,7 @@ func (ds *documentStorage) Update(documentId string, doc *domain.Document) error
 }
 
 func (ds *documentStorage) FindOne(documentID string) (*domain.Document, error) {
+	queriesCounter++
 	ds.debugLog.Printf("storage: getting document for doc ID [%s]", documentID)
 
 	session := ds.session.Copy()
@@ -114,6 +119,7 @@ func (ds *documentStorage) FindOne(documentID string) (*domain.Document, error) 
 }
 
 func (ds *documentStorage) FindAll() (*[]domain.Document, error) {
+	queriesCounter++
 	ds.debugLog.Printf("storage: getting all documents")
 
 	session := ds.session.Copy()
@@ -136,6 +142,7 @@ func (ds *documentStorage) FindAll() (*[]domain.Document, error) {
 }
 
 func (ds *documentStorage) RemoveOne(documentID string) error {
+	queriesCounter++
 	ds.debugLog.Printf("storage: removing document for doc ID [%s]", documentID)
 
 	session := ds.session.Copy()
@@ -153,4 +160,9 @@ func (ds *documentStorage) RemoveOne(documentID string) error {
 	ds.debugLog.Printf("storage: document removed with success doc ID [%s]", documentID)
 
 	return nil
+}
+
+func (ds *documentStorage) SessionQueries() int {
+	return queriesCounter
+
 }

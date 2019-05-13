@@ -58,3 +58,9 @@ func (ds *documentService) Remove(documentId string) error {
 
 	return nil
 }
+
+func (ds *documentService) SessionQueries() int {
+	return ds.documentStorage.SessionQueries()
+
+}
+

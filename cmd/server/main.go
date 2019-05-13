@@ -8,66 +8,54 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 )
 
 const (
 	ENVVAR_DEBUG               = "DEBUG"
-	DEFAULT_DATABASE_NAME      = "crmin"
+	DEFAULT_DATABASE_NAME      = "documents-crud"
 	DEFAULT_DEBUG              = true
 	ENVVAR_SERVICE_PORT        = "SERVICE_PORT"
 	ENVVAR_DATABASE_NAME       = "DATABASE_NAME"
-	ENVVAR_MONGO_URL           = "MONGO_URL"
-	ENVVAR_CONFIG_SERVICE_HOST = "CONFIG_SERVICE_HOST"
-	ENVVAR_CONFIG_SERVICE_PORT = "CONFIG_SERVICE_PORT"
-	ENVVAR_PLATFORM_URL        = "PLATFORM_URL"
+	ENVVAR_MONGO_HOST          = "MONGO_HOST"
+	ENVVAR_MONGO_PORT          = "MONGO_PORT"
 )
+var serverUp time.Time
 
 func main() {
-
+	serverUp = time.Now()
 	errorLog, debugLog, err := createLoggers()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create loggers: %s\n", err.Error())
 		return
 	}
 
-	//platformClient := platform.NewPlatformClient(getPlatformURL(), getConfigURL())
+	mongoURL := fmt.Sprintf("mongodb://%s:%s", getMongoHost(), getMongoPort())
 
-	//mongoURL := getMongoURL()
-	mongoURL := fmt.Sprintf("mongodb://%s:%s", "localhost","27017")
-
-	//dbName := getDatabaseName()
-	dbName := "documents-crud"
+	dbName := getDatabaseName()
 	documentStorage, err := mongo.NewDocumentStorage(mongoURL, dbName, debugLog)
 	if err != nil {
 		errorLog.Printf("error on creating a document storage instance: %q", err)
 		return
 	}
 
-	//servicePort := getServicePort()
-	servicePort := "1323"
+	servicePort := getServicePort()
 	documentService := document.NewService(documentStorage)
-	server := http.New(servicePort, documentService, debugLog, errorLog)
+	server := http.New(servicePort, documentService, debugLog, errorLog, serverUp)
 	server.ListenAndServe()
 
 }
 
-func getMongoURL() string {
-	return getEnvVar(ENVVAR_MONGO_URL)
+func getMongoHost() string {
+	return getEnvVar(ENVVAR_MONGO_HOST)
+}
+
+func getMongoPort() string {
+	return getEnvVar(ENVVAR_MONGO_PORT)
 }
 
 func getDatabaseName() string {
 	return getEnvVar(ENVVAR_DATABASE_NAME, DEFAULT_DATABASE_NAME)
-}
-
-func getPlatformURL() string {
-	return getEnvVar(ENVVAR_PLATFORM_URL)
-}
-
-func getConfigURL() string {
-	configHost := os.Getenv(ENVVAR_CONFIG_SERVICE_HOST)
-	configPort := os.Getenv(ENVVAR_CONFIG_SERVICE_PORT)
-
-	return "http://" + configHost + ":" + configPort + "/config"
 }
 
 func getServicePort() string {
@@ -114,5 +102,3 @@ func debugEnabled() bool {
 
 	return debug
 }
-
-

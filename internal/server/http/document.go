@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+var queriesCounter int
+
 func (h *handler) getIndex(c echo.Context) error {
 	return c.JSON(http.StatusOK, "Document index")
 }
@@ -112,4 +114,14 @@ func resolveID(c echo.Context) (string, error) {
 		return "", c.JSON(http.StatusBadRequest, err.Error())
 	}
 	return id, nil
+}
+
+func (h *handler) serverStatus(c echo.Context) (err error) {
+	var status domain.ServerStatus
+	uptime := time.Since(h.serverUptime)
+	status.UpTime = uptime.Seconds()
+	status.SessionQueries = h.documentService.SessionQueries()
+	return c.JSON(http.StatusOK, status)
+
+
 }

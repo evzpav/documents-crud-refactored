@@ -14,11 +14,11 @@ type Server struct {
 	errorLog logger
 }
 
-func New(port string, documentService domain.DocumentService, debugLog logger, errorLog logger) *Server {
+func New(port string, documentService domain.DocumentService, debugLog logger, errorLog logger, serverUptime time.Time) *Server {
 	return &Server{
 		server: &http.Server{
 			Addr:         ":" + port,
-			Handler:      NewHandler(documentService, debugLog, errorLog),
+			Handler:      NewHandler(documentService, debugLog, errorLog, serverUptime),
 			ReadTimeout:  5 * time.Second,
 			WriteTimeout: 55 * time.Second,
 		},
