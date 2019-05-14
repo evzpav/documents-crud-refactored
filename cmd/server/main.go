@@ -2,24 +2,26 @@ package main
 
 import (
 	"fmt"
-	"github.com/evzpav/documents-crud-refactored/domain/document"
-	"github.com/evzpav/documents-crud-refactored/internal/server/http"
-	"github.com/evzpav/documents-crud-refactored/internal/storage/mongo"
 	"log"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/evzpav/documents-crud-refactored/domain/service"
+	"github.com/evzpav/documents-crud-refactored/internal/server/http"
+	"github.com/evzpav/documents-crud-refactored/internal/storage"
 )
 
 const (
-	ENVVAR_DEBUG               = "DEBUG"
-	DEFAULT_DATABASE_NAME      = "documents-crud"
-	DEFAULT_DEBUG              = true
-	ENVVAR_SERVICE_PORT        = "SERVICE_PORT"
-	ENVVAR_DATABASE_NAME       = "DATABASE_NAME"
-	ENVVAR_MONGO_HOST          = "MONGO_HOST"
-	ENVVAR_MONGO_PORT          = "MONGO_PORT"
+	ENVVAR_DEBUG          = "DEBUG"
+	DEFAULT_DATABASE_NAME = "documents-crud"
+	DEFAULT_DEBUG         = true
+	ENVVAR_SERVICE_PORT   = "SERVICE_PORT"
+	ENVVAR_DATABASE_NAME  = "DATABASE_NAME"
+	ENVVAR_MONGO_HOST     = "MONGO_HOST"
+	ENVVAR_MONGO_PORT     = "MONGO_PORT"
 )
+
 var serverUp time.Time
 
 func main() {
@@ -33,14 +35,15 @@ func main() {
 	mongoURL := fmt.Sprintf("mongodb://%s:%s", getMongoHost(), getMongoPort())
 
 	dbName := getDatabaseName()
-	documentStorage, err := mongo.NewDocumentStorage(mongoURL, dbName, debugLog)
+	collectionName := "document"
+	documentStorage, err := storage.NewDocumentStorage(mongoURL, dbName, collectionName, debugLog)
 	if err != nil {
 		errorLog.Printf("error on creating a document storage instance: %q", err)
 		return
 	}
 
 	servicePort := getServicePort()
-	documentService := document.NewService(documentStorage)
+	documentService := service.NewService(documentStorage)
 	server := http.New(servicePort, documentService, debugLog, errorLog, serverUp)
 	server.ListenAndServe()
 

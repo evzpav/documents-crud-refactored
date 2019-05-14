@@ -1,4 +1,4 @@
-package document
+package service
 
 import "github.com/evzpav/documents-crud-refactored/domain"
 
@@ -40,7 +40,7 @@ func (ds *documentService) Insert(doc *domain.Document) (string, error) {
 }
 
 func (ds *documentService) Update(documentID string, doc *domain.Document) error {
-	err := ds.documentStorage.Update(documentID,doc)
+	err := ds.documentStorage.Update(documentID, doc)
 
 	if err != nil {
 		return err
@@ -63,4 +63,3 @@ func (ds *documentService) SessionQueries() int {
 	return ds.documentStorage.SessionQueries()
 
 }
-

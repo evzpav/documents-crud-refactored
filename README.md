@@ -1,5 +1,6 @@
 # documents-crud-refactored
 
+- Using Domain Driven Desing approach
 - CRUD of documents(CPF or CNPJ), with flags type and isBlacklisted.
 - Backend(server) done in Golang with Echo framework.
 - Structured to run on Docker, instructions are below:
@@ -21,4 +22,6 @@ sudo docker-compose up
 ```bash
 # Run Server:
 make all
+
+#Server will be running on: http://localhost:1323
 ```

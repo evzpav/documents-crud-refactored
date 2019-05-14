@@ -3,25 +3,27 @@ package mongo
 import (
 	"errors"
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/evzpav/documents-crud-refactored/domain"
 	"github.com/evzpav/documents-crud-refactored/internal"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"log"
-	"strings"
 )
 
-var queriesCounter int
+type logger interface {
+	Printf(string, ...interface{})
+}
 
-type documentStorage struct {
+type Mongo struct {
 	session        *mgo.Session
 	databaseName   string
 	collectionName string
 	debugLog       logger
 }
 
-func NewDocumentStorage(mongoURL, databaseName string, debugLog logger) (*documentStorage, error) {
-	log.Println(mongoURL) //TODO remove
+func NewMongo(mongoURL, databaseName, collectionName string, debugLog logger) (*Mongo, error) {
 	if strings.TrimSpace(mongoURL) == "" {
 		return nil, errors.New("mongoURL is required")
 	}
@@ -38,7 +40,6 @@ func NewDocumentStorage(mongoURL, databaseName string, debugLog logger) (*docume
 	//	Background: true,
 	//}
 
-	collectionName := "documents"
 	cc := mongoSession.DB(databaseName).C(collectionName)
 
 	log.Printf("collection: %+v ", cc)
@@ -46,7 +47,7 @@ func NewDocumentStorage(mongoURL, databaseName string, debugLog logger) (*docume
 	//	return nil, fmt.Errorf("error on MongoDB ensure document unique index: %q", err)
 	//}
 
-	return &documentStorage{
+	return &Mongo{
 		session:        mongoSession,
 		databaseName:   databaseName,
 		collectionName: collectionName,
@@ -55,8 +56,7 @@ func NewDocumentStorage(mongoURL, databaseName string, debugLog logger) (*docume
 
 }
 
-func (ds *documentStorage) Insert(document *domain.Document) (string, error) {
-	queriesCounter++
+func (ds *Mongo) Insert(document *domain.Document) (string, error) {
 	ds.debugLog.Printf("storage: insert document [%s] and value [%s]", document.ID, document.Value)
 
 	session := ds.session.Copy()
@@ -68,7 +68,7 @@ func (ds *documentStorage) Insert(document *domain.Document) (string, error) {
 		//if mgo.IsDup(err) {
 		//	return "", internal.NewDuplicatedRecordError("document")
 		//}
-		return "", fmt.Errorf("mongo: cannot insert document: %q", err)
+		return "", fmt.Errorf("Mongo: cannot insert document: %q", err)
 	}
 
 	ds.debugLog.Printf("storage: successfully insert document for doc ID [%s] and value [%s]", document.ID, document.Value)
@@ -76,8 +76,7 @@ func (ds *documentStorage) Insert(document *domain.Document) (string, error) {
 	return document.ID.Hex(), nil
 }
 
-func (ds *documentStorage) Update(documentId string, doc *domain.Document) error {
-	queriesCounter++
+func (ds *Mongo) Update(documentId string, doc *domain.Document) error {
 	ds.debugLog.Printf("storage: update document for doc ID [%s] and ID [%s]", documentId, doc.Value)
 
 	session := ds.session.Copy()
@@ -89,7 +88,7 @@ func (ds *documentStorage) Update(documentId string, doc *domain.Document) error
 		if err == mgo.ErrNotFound {
 			return internal.NewNotFoundError("document")
 		}
-		return fmt.Errorf("mongo: cannot update document: %q", err)
+		return fmt.Errorf("Mongo: cannot update document: %q", err)
 	}
 
 	ds.debugLog.Printf("storage: successfully update document for doc ID [%s] and value [%s]", documentId, doc.Value)
@@ -97,8 +96,7 @@ func (ds *documentStorage) Update(documentId string, doc *domain.Document) error
 	return nil
 }
 
-func (ds *documentStorage) FindOne(documentID string) (*domain.Document, error) {
-	queriesCounter++
+func (ds *Mongo) FindOne(documentID string) (*domain.Document, error) {
 	ds.debugLog.Printf("storage: getting document for doc ID [%s]", documentID)
 
 	session := ds.session.Copy()
@@ -110,7 +108,7 @@ func (ds *documentStorage) FindOne(documentID string) (*domain.Document, error) 
 		if err == mgo.ErrNotFound {
 			return nil, internal.NewNotFoundError("document")
 		}
-		return nil, fmt.Errorf("mongo: cannot get the document: %q", err)
+		return nil, fmt.Errorf("Mongo: cannot get the document: %q", err)
 	}
 
 	ds.debugLog.Printf("storage: document retrieved with success doc ID [%s] and value [%s]", documentID, document.Value)
@@ -118,8 +116,7 @@ func (ds *documentStorage) FindOne(documentID string) (*domain.Document, error) 
 	return document, nil
 }
 
-func (ds *documentStorage) FindAll() (*[]domain.Document, error) {
-	queriesCounter++
+func (ds *Mongo) FindAll() (*[]domain.Document, error) {
 	ds.debugLog.Printf("storage: getting all documents")
 
 	session := ds.session.Copy()
@@ -133,7 +130,7 @@ func (ds *documentStorage) FindAll() (*[]domain.Document, error) {
 		if err == mgo.ErrNotFound {
 			return nil, internal.NewNotFoundError("document")
 		}
-		return nil, fmt.Errorf("mongo: cannot get the document: %q", err)
+		return nil, fmt.Errorf("Mongo: cannot get the document: %q", err)
 	}
 
 	ds.debugLog.Printf("storage: documents retrieved with success")
@@ -141,8 +138,7 @@ func (ds *documentStorage) FindAll() (*[]domain.Document, error) {
 	return &docs, nil
 }
 
-func (ds *documentStorage) RemoveOne(documentID string) error {
-	queriesCounter++
+func (ds *Mongo) RemoveOne(documentID string) error {
 	ds.debugLog.Printf("storage: removing document for doc ID [%s]", documentID)
 
 	session := ds.session.Copy()
@@ -154,15 +150,10 @@ func (ds *documentStorage) RemoveOne(documentID string) error {
 		if err == mgo.ErrNotFound {
 			return internal.NewNotFoundError("document")
 		}
-		return fmt.Errorf("mongo: cannot remove the document: %q", err)
+		return fmt.Errorf("Mongo: cannot remove the document: %q", err)
 	}
 
 	ds.debugLog.Printf("storage: document removed with success doc ID [%s]", documentID)
 
 	return nil
-}
-
-func (ds *documentStorage) SessionQueries() int {
-	return queriesCounter
-
 }
