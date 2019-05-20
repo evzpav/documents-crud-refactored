@@ -25,3 +25,16 @@ make all
 
 #Server will be running on: http://localhost:1323
 ```
+
+
+
+docker run --name postgres_local -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:alpine
+
+docker exec -i postgres_local psql -U postgres
+CREATE DATABASE documents;
+
+
+docker run -v $PWD/internal/storage/postgres/migrations/:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://postgres:postgres@localhost:5432/documents?sslmode=disable goto 1
+
+
+docker run -v $PWD/internal/storage/postgres/migrations/:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://postgres:postgres@localhost:5432/documents?sslmode=disable version
