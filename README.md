@@ -1,4 +1,4 @@
-# documents-crud-refactored
+# Documents CRUD Refactored
 
 - Using Domain Driven Desing approach
 - CRUD of documents(CPF or CNPJ), with flags type and isBlacklisted.
