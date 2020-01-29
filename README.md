@@ -5,36 +5,20 @@
 - Backend(server) done in Golang with Echo framework.
 - Structured to run on Docker, instructions are below:
 
-##Instructions to run:
+## Instructions to run:
 
-## Method 1 - Docker
-###Pre-requisites: docker and docker-compose installed
+### Pre-requisites: 
+#### Server: Docker and docker-compose installed
+#### Client: NodeJs installed
+
 ```bash
-# Run docker compose:
-sudo docker-compose up
+# Run server on docker:
+make run
+# Server will be running on: http://localhost:3000
 
-#Server will be running on: http://localhost:3000
+# Install dependencies and run frontend:
+make run-front
+# Client will be running on: http://localhost:8080
+
 
 ```
-
-## Method 2 - Run locally
-###Pre-requisites: make, go and docker installed
-```bash
-# Run Server:
-make all
-
-#Server will be running on: http://localhost:1323
-```
-
-
-
-docker run --name postgres_local -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:alpine
-
-docker exec -i postgres_local psql -U postgres
-CREATE DATABASE documents;
-
-
-docker run -v $PWD/internal/storage/postgres/migrations/:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://postgres:postgres@localhost:5432/documents?sslmode=disable goto 1
-
-
-docker run -v $PWD/internal/storage/postgres/migrations/:/migrations --network host migrate/migrate -path=/migrations/ -database postgres://postgres:postgres@localhost:5432/documents?sslmode=disable version

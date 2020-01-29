@@ -9,13 +9,14 @@ FROM golang:1.12-alpine as builder
 RUN apk update && apk add --no-cache git ca-certificates tzdata && update-ca-certificates
 
 RUN adduser -D -g '' appuser
-WORKDIR $GOPATH/src/gitlab.com/evzpav/documents-crud-refactored/
+WORKDIR $GOPATH/src/github.com/evzpav/documents-crud-refactored/
 
 COPY . .
 
-RUN go get -u github.com/golang/dep/cmd/dep && dep ensure
+RUN GO111MODULE=on go mod download
+RUN GO111MODULE=on go mod vendor
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /go/bin/documents-crud-refactored .
+RUN CGO_ENABLED=0 GOOS=linux go build -o /go/bin/documents-crud-refactored ./cmd/server/main.go
 
 ############################
 # STEP 2 build a small image
