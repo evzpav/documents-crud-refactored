@@ -13,9 +13,6 @@ WORKDIR $GOPATH/src/github.com/evzpav/documents-crud-refactored/
 
 COPY . .
 
-RUN GO111MODULE=on go mod download
-RUN GO111MODULE=on go mod vendor
-
 RUN CGO_ENABLED=0 GOOS=linux go build -o /go/bin/documents-crud-refactored ./cmd/server/main.go
 
 ############################

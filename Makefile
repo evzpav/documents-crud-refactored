@@ -12,7 +12,7 @@ run-front:
 	cd client && npm install &&	npm run serve
 
 run: ## Run server on docker
-	docker-compose up -d
+	docker-compose up
 
 env-stop: ## Kill tests environment
 	docker-compose kill

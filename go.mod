@@ -10,8 +10,10 @@ require (
 	github.com/labstack/gommon v0.2.8
 	github.com/mattn/go-colorable v0.1.1 // indirect
 	github.com/mattn/go-isatty v0.0.7 // indirect
+	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/valyala/fasttemplate v1.0.1 // indirect
 	golang.org/x/net v0.0.0-20190509222800-a4d6f7feada5 // indirect
 	golang.org/x/sys v0.0.0-20190509141414-a5b02f93d862 // indirect
 	golang.org/x/text v0.3.2 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
